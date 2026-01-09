@@ -4,3 +4,5 @@ osmnx
 networkx
 numpy
 scipy
+scikit-learn
+    

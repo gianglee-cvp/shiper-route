@@ -11,3 +11,4 @@ backend/cache/
 .vscode/
 .idea/
 .DS_Store
+node_modules/

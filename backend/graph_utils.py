@@ -38,37 +38,7 @@ def load_graph(place_name="Hoan Kiem, Hanoi, Vietnam", dist=5000):
     print(f"Graph loaded: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
     return G
 
-def get_shortest_path(G, origin_point, dest_point, weight='travel_time', algorithm='dijkstra'):
-    """
-    Find shortest path between two lat/lng points.
-    The path follows actual road directions (respects one-way streets).
-    
-    origin_point: (lat, lng)
-    dest_point: (lat, lng)
-    weight: 'travel_time' (fastest) or 'length' (shortest distance)
-    """
-    # Find nearest nodes to the given coordinates
-    orig_node = ox.distance.nearest_nodes(G, origin_point[1], origin_point[0])
-    dest_node = ox.distance.nearest_nodes(G, dest_point[1], dest_point[0])
-    
-    print(f"Finding path from node {orig_node} to {dest_node} using {algorithm}")
-    
-    path = None
-    if algorithm == 'dijkstra':
-        path = nx.shortest_path(G, orig_node, dest_node, weight=weight)
-    elif algorithm == 'astar':
-        # A* with haversine heuristic for geographic data
-        def heuristic(u, v):
-            return ox.distance.great_circle(
-                G.nodes[u]['y'], G.nodes[u]['x'],
-                G.nodes[v]['y'], G.nodes[v]['x']
-            )
-        path = nx.astar_path(G, orig_node, dest_node, heuristic=heuristic, weight=weight)
-    else:
-        path = nx.shortest_path(G, orig_node, dest_node, weight=weight)
-    
-    print(f"Path found with {len(path)} nodes")
-    return path
+
 
 def path_to_coords(G, path):
     """
@@ -166,3 +136,49 @@ def get_route_stats(G, path):
         'travel_time_seconds': round(total_time, 2),
         'travel_time_minutes': round(total_time / 60, 2)
     }
+
+def get_nearest_node(G, point):
+    """
+    Find the nearest node in the graph to a given (lat, lng) point.
+    Returns (node_id, lat, lng).
+    """
+    # ox.distance.nearest_nodes takes (G, X, Y) where X is lng, Y is lat
+    node_id = ox.distance.nearest_nodes(G, point[1], point[0])
+    
+    node = G.nodes[node_id]
+    return node_id, node['y'], node['x']
+
+def get_shortest_path(G, origin_point, dest_point, weight='travel_time', algorithm='dijkstra', start_node_id=None, end_node_id=None):
+    """
+    Find shortest path between two points.
+    If start_node_id/end_node_id are provided, uses them directly.
+    Otherwise functionality remains finding nearest nodes to coords.
+    """
+    if start_node_id is not None:
+        orig_node = start_node_id
+    else:
+        orig_node = ox.distance.nearest_nodes(G, origin_point[1], origin_point[0])
+
+    if end_node_id is not None:
+        dest_node = end_node_id
+    else:
+        dest_node = ox.distance.nearest_nodes(G, dest_point[1], dest_point[0])
+    
+    print(f"Finding path from node {orig_node} to {dest_node} using {algorithm}")
+    
+    path = None
+    if algorithm == 'dijkstra':
+        path = nx.shortest_path(G, orig_node, dest_node, weight=weight)
+    elif algorithm == 'astar':
+        # A* with haversine heuristic for geographic data
+        def heuristic(u, v):
+            return ox.distance.great_circle(
+                G.nodes[u]['y'], G.nodes[u]['x'],
+                G.nodes[v]['y'], G.nodes[v]['x']
+            )
+        path = nx.astar_path(G, orig_node, dest_node, heuristic=heuristic, weight=weight)
+    else:
+        path = nx.shortest_path(G, orig_node, dest_node, weight=weight)
+    
+    print(f"Path found with {len(path)} nodes")
+    return path
