@@ -1,0 +1,33 @@
+{
+    "name": "Hanoi Shipper Router",
+    "image": "mcr.microsoft.com/devcontainers/python:3.10",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {}
+    },
+    "postCreateCommand": "pip install -r backend/requirements.txt",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ritwickdey.liveserver"
+            ]
+        }
+    },
+    "forwardPorts": [
+        5000,
+        8000
+    ],
+    "portsAttributes": {
+        "5000": {
+            "label": "Backend (Flask)",
+            "onAutoForward": "notify"
+        },
+        "8000": {
+            "label": "Frontend",
+            "onAutoForward": "notify"
+        }
+    }
+}
