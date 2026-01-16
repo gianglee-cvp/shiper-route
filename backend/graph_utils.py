@@ -2,6 +2,8 @@ import osmnx as ox
 import networkx as nx
 import os
 from shapely.geometry import LineString
+from dijkstra import dijkstra_path
+from astar import astar_path
 
 # Get the directory where this script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -137,6 +139,9 @@ def get_route_stats(G, path):
         'travel_time_minutes': round(total_time / 60, 2)
     }
 
+
+
+
 def get_nearest_node(G, point):
     """
     Find the nearest node in the graph to a given (lat, lng) point.
@@ -168,7 +173,7 @@ def get_shortest_path(G, origin_point, dest_point, weight='travel_time', algorit
     
     path = None
     if algorithm == 'dijkstra':
-        path = nx.shortest_path(G, orig_node, dest_node, weight=weight)
+        path = dijkstra_path(G, orig_node, dest_node, weight=weight)
     elif algorithm == 'astar':
         # A* with haversine heuristic for geographic data
         def heuristic(u, v):
@@ -176,9 +181,9 @@ def get_shortest_path(G, origin_point, dest_point, weight='travel_time', algorit
                 G.nodes[u]['y'], G.nodes[u]['x'],
                 G.nodes[v]['y'], G.nodes[v]['x']
             )
-        path = nx.astar_path(G, orig_node, dest_node, heuristic=heuristic, weight=weight)
+        path = astar_path(G, orig_node, dest_node, heuristic=heuristic, weight=weight)
     else:
-        path = nx.shortest_path(G, orig_node, dest_node, weight=weight)
+        path = dijkstra_path(G, orig_node, dest_node, weight=weight)
     
     print(f"Path found with {len(path)} nodes")
     return path

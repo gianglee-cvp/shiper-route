@@ -51,6 +51,12 @@ map.on('click', async function (e) {
         const nodeId = data.id;
         const coordsStr = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
+        // Clear existing route if any - user is changing input
+        if (routeLine) {
+            map.removeLayer(routeLine);
+            routeLine = null;
+        }
+
         if (selectionMode === 'start') {
             // Remove old markers
             if (startMarker) map.removeLayer(startMarker);
